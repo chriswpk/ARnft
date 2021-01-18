@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build-es6",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build-es6",
+			"detail": "webpack --mode production"
+		}
+	]
+}

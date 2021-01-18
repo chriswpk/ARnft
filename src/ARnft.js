@@ -106,7 +106,7 @@ export default class ARnft {
     root.add(obj)
   }
 
-  addModel (url, x, y, z, scale) {
+  addModel (url, x, y, z, scale, rx, ry, rz) {
     const root = this.root
     let model
 
@@ -115,11 +115,17 @@ export default class ARnft {
 
     threeGLTFLoader.load(url, gltf => {
       model = gltf.scene
+      model.traverse((object) => {
+        if (object.isMesh) object.material.transparent = false;
+      })
       model.scale.set(scale, scale, scale)
       model.rotation.x = Math.PI / 2
       model.position.x = x
       model.position.y = y
       model.position.z = z
+      model.rotateX(rx)
+      model.rotateY(ry)
+      model.rotateZ(rz)
 
       root.add(model)
     })

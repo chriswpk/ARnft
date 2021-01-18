@@ -31,9 +31,17 @@ export default class ThreejsRenderer {
     })
     this.scene.add(this.camera)
 
-    const light = new THREE.AmbientLight(0xffffff)
-    this.scene.add(light)
+    // const light = new THREE.AmbientLight(0xffffff)
+    // this.scene.add(light)
 
+    // const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+    // hemiLight.position.set( 0, 0, 0 );
+    // this.scene.add( hemiLight );
+
+    const dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+    dirLight.position.set( 45, 75, 75 );
+    this.scene.add(dirLight);
+    
     document.addEventListener('getMatrixGL_RH', (ev) => {
       this.root.visible = true
       const matrix = Utils.interpolate(ev.detail.matrixGL_RH)
