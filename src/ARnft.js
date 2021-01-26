@@ -4,14 +4,37 @@ import Stats from 'stats.js'
 import ThreejsRenderer from './renderers/ThreejsRenderer'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { CSS3DObject } from "three/examples//jsm/renderers/CSS3DRenderer";
+
+function VideoElement(id, x, y, z, ry) {
+  const div = document.createElement("div");
+  div.style.width = "480px";
+  div.style.height = "360px";
+  div.style.backgroundColor = "#000";
+
+  const iframe = document.createElement("iframe");
+  iframe.style.width = "480px";
+  iframe.style.height = "360px";
+  iframe.style.border = "0px";
+  iframe.src = ["https://www.youtube.com/embed/", id, "?rel=0"].join("");
+  div.appendChild(iframe);
+
+  const object = new CSS3DObject(div);
+  object.position.set(x, y, z);
+  object.rotation.y = ry;
+
+  return object;
+}
 
 export default class ARnft {
   constructor (width, height, config) {
     this.width = width
     this.height = height
     this.root = new THREE.Object3D()
+    this.cssRoot = new THREE.Object3D()
     this.renderer = null
     this.root.matrixAutoUpdate = false
+    this.cssRoot.matrixAutoUpdate = false
     this.config = config
     this.listeners = {}
     this.version = '0.8.4'
@@ -21,6 +44,7 @@ export default class ARnft {
   _initialize (markerUrl, stats, camera) {
     console.log('ARnft init() %cstart...', 'color: yellow; background-color: blue; border-radius: 4px; padding: 2px')
     const root = this.root
+    const cssRoot = this.cssRoot
     const config = this.config
     let data
     if (typeof(config) == 'object') {
@@ -76,7 +100,7 @@ export default class ARnft {
       })
 
       if (configData.renderer.type === 'three') {
-        const renderer = new ThreejsRenderer(configData, canvas, root, camera)
+        const renderer = new ThreejsRenderer(configData, canvas, root, camera, cssRoot, container)
         renderer.initRenderer()
         this.renderer = renderer
         const setRendererEvent = new CustomEvent('onAfterInitThreejsRendering', { detail: { renderer: renderer } })
@@ -161,6 +185,23 @@ export default class ARnft {
       plane.position.x = (msg.width / msg.dpi * 2.54 * 10) / 2.0
     })
     root.add(plane)
+  }
+
+  addYoutubeVideo(id, x, y, z, ry) {
+    const cssRoot = this.cssRoot;
+
+    const group = new THREE.Group();
+    group.add(VideoElement(id, x, y, z, ry));
+
+    console.log("Added video");
+
+    document.addEventListener('getNFTData', (ev) => {
+      var msg = ev.detail
+      group.position.y = (msg.height / msg.dpi * 2.54 * 10) / 2.0
+      group.position.x = (msg.width / msg.dpi * 2.54 * 10) / 2.0
+    })
+
+    cssRoot.add(group);
   }
 
   dispatchEvent (event) {

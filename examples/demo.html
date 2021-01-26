@@ -23,11 +23,46 @@
         480,
         "examples/DataNFT/side_2",
         "config_brave_robot.json",
+        true,
         true
       )
         .then((nft) => {
+          var scene;
+          document.addEventListener("onInitThreejsRendering", (ev) => {
+            console.log(ev.detail);
+            const renderer = ev.detail.renderer;
+            console.log(renderer);
+            scene = ev.detail.scene;
+            console.log(scene);
+            const camera = ev.detail.camera;
+            console.log(camera);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.physicallyCorrectLights = true;
+            let directionalLight = new THREE.DirectionalLight("#fff", 0.7);
+            directionalLight.position.set(0.5, 0, 0.866);
+            scene.add(directionalLight);
+          });
+
+          document.addEventListener("onAfterInitThreejsRendering", (ev) => {
+            // set here extra rendering settings after onInitThreejsRendering
+            console.log(
+              "onAfterInitThreejsRendering is emitted after onInitThreejsRendering!"
+            );
+            console.log(scene);
+
+            // Testing
+            let mat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+            let cubeGeom = new THREE.CubeGeometry(1, 1, 1);
+            let cube = new THREE.Mesh(cubeGeom, mat);
+            cube.position.z = -15;
+            cube.scale.set(2, 2, 2);
+
+            scene.add(cube);
+          });
+
+          // gLTF model provided by Brett Alistair Kromkamp https://github.com/brettkromkamp
           nft.addModel(
-            "./Data/models/trailer2/scene.glb",
+            "./Data/models/trailer/scene.gltf",
             45,
             45,
             0,
@@ -38,6 +73,8 @@
           );
           const axesHelper = new THREE.AxesHelper(5);
           nft.root.add(axesHelper);
+
+          nft.addYoutubeVideo("SJOz3qjfQXU", 0, 0, 240, 0);
           //   let mat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
           //   let cubeGeom = new THREE.CubeGeometry(1, 1, 1);
           //   let cube = new THREE.Mesh(cubeGeom, mat);
