@@ -2,6 +2,7 @@ import Utils from './utils/Utils'
 import Container from './utils/html/Container'
 import Stats from 'stats.js'
 import ThreejsRenderer from './renderers/ThreejsRenderer'
+import BabylonjsRenderer from './renderers/BabylonjsRenderer'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { CSS3DObject } from "three/examples//jsm/renderers/CSS3DRenderer";
@@ -27,14 +28,18 @@ function VideoElement(id, x, y, z, ry) {
 }
 
 export default class ARnft {
-  constructor (width, height, config) {
+  constructor (width, height, config, renderType) {
     this.width = width
     this.height = height
-    this.root = new THREE.Object3D()
-    this.cssRoot = new THREE.Object3D()
-    this.renderer = null
-    this.root.matrixAutoUpdate = false
-    this.cssRoot.matrixAutoUpdate = false
+    if (renderType === 'three') {
+      this.renderer = null
+      this.root = new THREE.Object3D()
+      this.cssRoot = new THREE.Object3D()
+      this.root.matrixAutoUpdate = false
+      this.cssRoot.matrixAutoUpdate = false
+    } else if (renderType === 'babylon') {
+      this.root = null
+    }
     this.config = config
     this.listeners = {}
     this.version = '0.8.4'
@@ -110,6 +115,14 @@ export default class ARnft {
           window.requestAnimationFrame(tick)
         }
         tick()
+      } else if (configData.renderer.type === 'babylon') {
+        const renderer = new BabylonjsRenderer(configData, canvas, root)
+        renderer.initRenderer()
+        const tick = () => {
+          renderer.draw()
+          window.requestAnimationFrame(tick)
+        }
+        tick()
       }
     })
     return this
@@ -128,6 +141,13 @@ export default class ARnft {
       obj.position.x = (msg.width / msg.dpi * 2.54 * 10) / 2.0
     })
     root.add(obj)
+  }
+
+  addB () {
+    //let scene = BabylonjsRenderer.getScene()
+    //console.log(scene);
+    //var box = new BABYLON.Mesh.CreateBox("box", {height: 5}, scene)
+    //box.parent = BabylonjsRenderer.getRoot()
   }
 
   addModel (url, x, y, z, scale, rx, ry, rz) {
