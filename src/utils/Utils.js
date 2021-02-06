@@ -162,6 +162,9 @@ export default class Utils {
 
       const setWindowSizeEvent = new CustomEvent('getWindowSize', { detail: { sw: sw, sh: sh } })
       document.dispatchEvent(setWindowSizeEvent)
+      
+      // Dispatch when resize
+      document.addEventListener('resize', () => document.dispatchEvent(setWindowSizeEvent))
 
       worker = new Worker()
 
