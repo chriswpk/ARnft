@@ -161,10 +161,16 @@ export default class Utils {
       canvasProcess.height = ph
 
       const setWindowSizeEvent = new CustomEvent('getWindowSize', { detail: { sw: sw, sh: sh } })
+      // const setWindowLandscapeEvent = new CustomEvent('getWindowSize', { detail: {sw: sh, sh: sw}})
       document.dispatchEvent(setWindowSizeEvent)
       
       // Dispatch when resize
-      document.addEventListener('resize', () => document.dispatchEvent(setWindowSizeEvent))
+      // document.addEventListener('orientationchange', (ev) => {
+      //   if (Math.abs(ev.target.screen.orientation.angle) > 0 )
+      //     document.dispatchEvent(setWindowLandscapeEvent)
+      //   else
+      //     document.dispatchEvent(setWindowSizeEvent)
+      // });
 
       worker = new Worker()
 
@@ -203,6 +209,9 @@ export default class Utils {
               const loader = document.getElementById('loading')
               if (loader) {
                 loader.querySelector('.loading-text').innerText = 'Start the tracking!'
+
+                const startTrackingEvent = new CustomEvent('startTracking');
+                document.dispatchEvent(startTrackingEvent);
                 setTimeout(function () {
                   loader.parentElement.removeChild(loader)
                 }, 2000)
@@ -231,11 +240,13 @@ export default class Utils {
     }
 
     let world
+    let tracked
 
     const found = (msg) => {
       if (!msg) {
         if (world) {
           world = null
+          tracked = false
           const nftTrackingLostEvent = new CustomEvent('nftTrackingLost')
           document.dispatchEvent(nftTrackingLostEvent)
         }
@@ -243,6 +254,12 @@ export default class Utils {
         world = JSON.parse(msg.matrixGL_RH)
         const matrixGLrhEvent = new CustomEvent('getMatrixGL_RH', { detail: { matrixGL_RH: world } })
         document.dispatchEvent(matrixGLrhEvent)
+
+        if (!tracked) {
+          tracked = true
+          const trackStartEvent = new CustomEvent('nftTrackingStart')
+          document.dispatchEvent(trackStartEvent)
+        }
       }
     }
 

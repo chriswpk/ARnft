@@ -6,6 +6,16 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export default class ARnft {
+  static CreateOutlineConfig() {
+    return {
+      edgeStrength: 3.0,
+      edgeGlow: 0.0,
+      edgeThickness: 1.0,
+      pulsePeriod: 0,
+      usePatternTexture: false
+    };
+  }
+
   constructor (width, height, config) {
     this.width = width
     this.height = height
@@ -20,6 +30,7 @@ export default class ARnft {
 
   _initialize (markerUrl, stats, camera) {
     console.log('ARnft init() %cstart...', 'color: yellow; background-color: blue; border-radius: 4px; padding: 2px')
+    console.log('Test');
     const root = this.root
     const config = this.config
     let data
@@ -96,12 +107,24 @@ export default class ARnft {
     return await nft._initialize(markerUrl, stats, camera)
   }
 
-  add (obj) {
+  static unload() {
+    const existingNFT = document.getElementById('app');
+    if (existingNFT)
+      existingNFT.remove();
+  }
+
+  add (obj, placement) {
     const root = this.root
     document.addEventListener('getNFTData', (ev) => {
       var msg = ev.detail
-      obj.position.y = (msg.height / msg.dpi * 2.54 * 10) / 2.0
-      obj.position.x = (msg.width / msg.dpi * 2.54 * 10) / 2.0
+      if (placement === 'origin') {
+        obj.position.y = 0;
+        obj.position.x = 0;
+      }
+      else {
+        obj.position.y = (msg.height / msg.dpi * 2.54 * 10) / 2.0
+        obj.position.x = (msg.width / msg.dpi * 2.54 * 10) / 2.0
+      }
     })
     root.add(obj)
   }
