@@ -25,10 +25,11 @@ export default class ARnft {
     this.config = config
     this.listeners = {}
     this.version = '0.8.4'
+    this.video = null
     console.log('ARnft ', this.version)
   }
 
-  _initialize (markerUrl, stats, camera) {
+  _initialize (markerUrl, stats, camera, onRender) {
     console.log('ARnft init() %cstart...', 'color: yellow; background-color: blue; border-radius: 4px; padding: 2px')
     console.log('Test');
     const root = this.root
@@ -66,6 +67,7 @@ export default class ARnft {
       }
 
       Utils.getUserMedia(configData).then((video) => {
+        this.video = video
         Utils._startWorker(
           container,
           markerUrl,
@@ -93,8 +95,11 @@ export default class ARnft {
         const setRendererEvent = new CustomEvent('onAfterInitThreejsRendering', { detail: { renderer: renderer } })
         document.dispatchEvent(setRendererEvent)
         const tick = () => {
-          renderer.draw()
-          window.requestAnimationFrame(tick)
+          if (this.renderer) {
+            renderer.draw()
+            typeof onRender === 'function' && onRender.call(this);
+            window.requestAnimationFrame(tick)
+          }
         }
         tick()
       }
@@ -102,12 +107,27 @@ export default class ARnft {
     return this
   }
 
-  static async init (width, height, markerUrl, config, stats, camera) {
+  static async init (width, height, markerUrl, config, stats, camera, onRender) {
     const nft = new ARnft(width, height, config)
-    return await nft._initialize(markerUrl, stats, camera)
+    return await nft._initialize(markerUrl, stats, camera, onRender)
   }
 
-  static unload() {
+  unload() {
+    // Unload video
+    if (this.video && (this.video.srcObject || this.video.src)) {
+      this.video.srcObject && this.video.srcObject
+        .getTracks()
+        .forEach((track) => track.stop());
+      this.video.srcObject = null;
+      this.video.src = '';
+    }
+    
+    // Unload 3D scene
+    Utils.cleanUpScene(this.renderer.scene);
+    this.renderer.renderer.dispose();
+    this.renderer = null;
+
+    // Remove DOM element
     const existingNFT = document.getElementById('app');
     if (existingNFT)
       existingNFT.remove();
